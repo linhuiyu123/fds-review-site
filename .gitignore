@@ -1,0 +1,16 @@
+node_modules/
+dist/
+output/
+.vercel/
+.env
+.env.*
+
+# Local source materials and extraction artifacts are not needed for hosting.
+*.pdf
+data/pdf-text/
+data/*raw.json
+data/generated-summary.json
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
