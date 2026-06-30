@@ -384,6 +384,7 @@ function QuestionPanel({
             <strong>{answerLabel(question.answer)}</strong>
           </div>
           <p>{question.explanation}</p>
+          {question.referenceAnswer ? <pre className="reference-answer">{question.referenceAnswer}</pre> : null}
         </section>
       ) : null}
 

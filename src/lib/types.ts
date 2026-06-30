@@ -31,6 +31,7 @@ export interface Question {
   prompt: string;
   options: QuestionOption[];
   answer?: string[];
+  referenceAnswer?: string;
   explanation: string;
   images: QuestionImage[];
   score?: number | null;

@@ -1,6 +1,14 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {
+  cleanPtaOptionText,
+  cleanPtaPrompt,
+  dedupeQuestions,
+  extractReferenceCode,
+  inferReferenceAnswer,
+  propagateDuplicateAnswers
+} from './build-data-utils.mjs';
 
 const root = process.cwd();
 
@@ -46,7 +54,7 @@ function extractOptions(prompt, kind) {
     ];
   }
   return Array.from(prompt.matchAll(/(^|\s)([A-D])\.\s*([\s\S]*?)(?=\s+[A-D]\.\s|$)/g))
-    .map((match) => ({ key: match[2], text: cleanText(match[3]) }))
+    .map((match) => ({ key: match[2], text: cleanText(cleanPtaOptionText(match[3])) }))
     .filter((option) => option.text);
 }
 
@@ -199,6 +207,9 @@ function buildExplanation(answer, tags, kind, context) {
   if (kind === 'fill-blank') {
     return `填空答案：${answer.join('；')}。这些空应保证代码逻辑、指针/下标更新和边界条件同时成立；复盘时按语句执行顺序检查。${focus}`;
   }
+  if (kind === 'function' || kind === 'programming') {
+    return `参考答案见下方。复习时重点检查算法思路、数据结构维护、边界条件和输出格式。${focus}`;
+  }
   const options = typeof context === 'string' ? undefined : context?.options;
   return `${answerPrefix(answer)} 的依据：${optionText(answer, options)}${focus} 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。`;
 }
@@ -214,7 +225,7 @@ function parsePdfQuestions(text, meta) {
     const { prompt, answerBlock } = stripAnswer(match[3]);
     const answer = extractAnswer(answerBlock);
     const options = extractOptions(prompt, type.kind);
-    const questionPrompt = stripOptionsFromPrompt(prompt, type.kind);
+    const questionPrompt = cleanText(cleanPtaPrompt(stripOptionsFromPrompt(prompt, type.kind), label));
     const tags = inferTags(questionPrompt);
     questions.push({
       id: `pdf-${meta.sourceId}-${label}`,
@@ -242,7 +253,7 @@ function typeFromCode(code) {
 }
 
 function normalizePtaOption(option, kind) {
-  const text = cleanText(option.text);
+  const text = cleanText(cleanPtaOptionText(option.text));
   if (kind === 'true-false') return { key: text.toUpperCase(), text: text.toUpperCase() };
   return { key: option.key || text.match(/^[A-D]/)?.[0] || '', text: text.replace(/^[A-D]\.\s*/, '') };
 }
@@ -251,9 +262,10 @@ function normalizePta(raw) {
   return raw.results.flatMap((set) =>
     set.questions.map((question, index) => {
       const type = typeFromCode(question.typeCode);
-      const prompt = cleanText(question.prompt);
+      const rawPrompt = cleanText(question.prompt);
+      const prompt = cleanText(cleanPtaPrompt(rawPrompt, question.label || question.title || ''));
       const options = (question.options ?? []).map((option) => normalizePtaOption(option, type.kind));
-      return {
+      const normalized = {
         id: `pta-${set.id}-${question.pintiaId || index}`,
         sourceId: `pta-${set.id}`,
         sourceName: set.name,
@@ -264,11 +276,20 @@ function normalizePta(raw) {
         title: question.title && question.title !== question.label ? question.title : question.label || `P${index + 1}`,
         prompt,
         options,
-        explanation: buildExplanation(undefined, inferTags(`${question.title ?? ''}\n${prompt}`), type.kind, { prompt, options }),
+        rawPrompt,
+        referenceAnswer: extractReferenceCode(rawPrompt),
         images: (question.images ?? []).filter((image) => image.src).map((image) => ({ src: image.src, alt: image.alt || '' })),
         score: question.score ?? null,
         url: question.url,
         tags: inferTags(`${question.title ?? ''}\n${prompt}`)
+      };
+      const inferred = inferReferenceAnswer(normalized);
+      const answer = inferred.answer;
+      return {
+        ...normalized,
+        answer,
+        referenceAnswer: inferred.referenceAnswer ?? normalized.referenceAnswer,
+        explanation: inferred.explanation ?? buildExplanation(answer, normalized.tags, type.kind, { prompt, options })
       };
     })
   );
@@ -320,8 +341,25 @@ async function main() {
     pdfQuestions.push(...parsePdfQuestions(text, meta));
   }
 
-  const questions = [...pdfQuestions, ...ptaQuestions];
+  let questions = [...pdfQuestions, ...ptaQuestions].map((question) => {
+    const inferred = inferReferenceAnswer(question);
+    if (!inferred.answer && !inferred.referenceAnswer) return question;
+    const answer = inferred.answer ?? question.answer;
+    return {
+      ...question,
+      answer,
+      referenceAnswer: inferred.referenceAnswer ?? question.referenceAnswer,
+      explanation: inferred.explanation ?? buildExplanation(answer, question.tags, question.kind, { prompt: question.prompt, options: question.options })
+    };
+  });
+  questions = propagateDuplicateAnswers(questions).map((question) => ({
+    ...question,
+    explanation: buildExplanation(question.answer, question.tags, question.kind, { prompt: question.prompt, options: question.options })
+  }));
+  const beforeDedupe = questions.length;
+  questions = dedupeQuestions(questions);
   await downloadImages(questions);
+  questions = questions.map(({ rawPrompt, ...question }) => question);
 
   await fs.mkdir(path.join(root, 'src', 'data'), { recursive: true });
   await fs.writeFile(path.join(root, 'src', 'data', 'questions.generated.json'), `${JSON.stringify(questions, null, 2)}\n`, 'utf8');
@@ -330,6 +368,8 @@ async function main() {
     `${JSON.stringify({
       generatedAt: new Date().toISOString(),
       total: questions.length,
+      duplicatesRemoved: beforeDedupe - questions.length,
+      missingAnswers: questions.filter((question) => !question.answer?.length && !question.referenceAnswer).length,
       bySourceKind: questions.reduce((acc, question) => {
         acc[question.sourceKind] = (acc[question.sourceKind] ?? 0) + 1;
         return acc;
