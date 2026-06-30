@@ -1612,7 +1612,12 @@
       "C"
     ],
     "explanation": "选 C 的依据：正确选项是 C. 15。图题高频考 DFS/BFS、连通性、割点/双连通、最短路、最小生成树、拓扑排序、欧拉路和最大流；先分清有向/无向、权值、入度出度和算法适用条件。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/a78bf3bda525a43a.png",
+        "alt": "networkflow1.png"
+      }
+    ],
     "score": null,
     "tags": [
       "Graph"
@@ -1764,7 +1769,12 @@
       "D"
     ],
     "explanation": "选 D 的依据：正确选项是 D. 10。图题高频考 DFS/BFS、连通性、割点/双连通、最短路、最小生成树、拓扑排序、欧拉路和最大流；先分清有向/无向、权值、入度出度和算法适用条件。 排序题重点是 Shell/Merge/Quick/Heap/Radix 的每一趟结果、稳定性和比较次数；按算法真实执行过程逐趟推，不要只看最终有序性。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/998aa09c78571e47.png",
+        "alt": "topo2.png"
+      }
+    ],
     "score": null,
     "tags": [
       "Graph",
@@ -2249,7 +2259,12 @@
       "a[treeRight]!=0"
     ],
     "explanation": "填空答案：2*tree；a[treeRight]!=0。这些空应保证代码逻辑、指针/下标更新和边界条件同时成立；复盘时按语句执行顺序检查。树题重点是遍历序列还原、完全二叉树编号、线索二叉树、树的度和叶子数关系；先写出根、左右子树和层次关系再判断。 栈和队列题重点是表达式转换、括号匹配、循环队列 front/rear 定义；先确认空满判定和操作顺序。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/b3422dd484172967.jpg",
+        "alt": "图1.jpg"
+      }
+    ],
     "score": null,
     "tags": [
       "Tree",
@@ -4112,7 +4127,12 @@
       "A"
     ],
     "explanation": "选 A 的依据：正确选项是 A. Start from vertex V6 as the first vertex, the third vertex must be v7.。图题高频考 DFS/BFS、连通性、割点/双连通、最短路、最小生成树、拓扑排序、欧拉路和最大流；先分清有向/无向、权值、入度出度和算法适用条件。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/5452318be375213a.png",
+        "alt": "image.png"
+      }
+    ],
     "score": null,
     "tags": [
       "Graph"
@@ -5601,7 +5621,12 @@
       "B"
     ],
     "explanation": "选 B 的依据：正确选项是 B. UNION(B, E), UNION(A, C), UNION(D, F), UNION(C, E), UNION(G, H), UNION(D, H),\n\n UNION(C, H), UNION(I, C)。并查集题重点是 union-by-size/height、路径压缩后的父数组和树高；每次 Union 前先 Find，压缩会改变沿途父节点。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/532e04468056c29c.png",
+        "alt": "image.png"
+      }
+    ],
     "score": null,
     "tags": [
       "Disjoint Set"
@@ -5677,7 +5702,12 @@
       "C"
     ],
     "explanation": "选 C 的依据：正确选项是 C. 45。图题高频考 DFS/BFS、连通性、割点/双连通、最短路、最小生成树、拓扑排序、欧拉路和最大流；先分清有向/无向、权值、入度出度和算法适用条件。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/4950ab6b2c0fb9f2.jpg",
+        "alt": "t2.jpg"
+      }
+    ],
     "score": null,
     "tags": [
       "Graph"
@@ -5715,7 +5745,12 @@
       "A"
     ],
     "explanation": "选 A 的依据：正确选项是 A. 3。图题高频考 DFS/BFS、连通性、割点/双连通、最短路、最小生成树、拓扑排序、欧拉路和最大流；先分清有向/无向、权值、入度出度和算法适用条件。 排除其它选项时，重点检查定义是否被反向、算法适用条件是否不满足、边界条件是否被忽略。",
-    "images": [],
+    "images": [
+      {
+        "src": "/assets/pintia/e28f9472b2f40d5d.png",
+        "alt": ""
+      }
+    ],
     "score": null,
     "tags": [
       "Graph"

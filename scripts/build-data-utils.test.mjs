@@ -131,6 +131,31 @@ describe('deduplication and answer inference', () => {
     expect(dedupeQuestions([duplicate, answered])).toEqual([answered]);
   });
 
+  it('preserves images from duplicate PTA copies when the answered copy is kept', () => {
+    const answered = {
+      id: 'pdf-graph',
+      sourceKind: 'past-paper',
+      prompt: 'The maximum flow in the network of the given figure is:',
+      options: [{ key: 'A', text: '10' }],
+      answer: ['A'],
+      images: []
+    };
+    const withImage = {
+      id: 'pta-graph',
+      sourceKind: 'final-practice',
+      prompt: 'The maximum flow in the network of the given figure is:',
+      options: [{ key: 'A', text: '10' }],
+      images: [{ src: 'https://images.ptausercontent.com/network.png', alt: 'network' }]
+    };
+
+    expect(dedupeQuestions([withImage, answered])).toEqual([
+      {
+        ...answered,
+        images: withImage.images
+      }
+    ]);
+  });
+
   it('infers objective answers for common homework patterns', () => {
     const answer = inferReferenceAnswer({
       id: 'q',

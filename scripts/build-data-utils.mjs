@@ -168,6 +168,16 @@ function questionRank(question) {
   return (question.answer?.length ? 10000 : 0) + (question.referenceAnswer ? 1000 : 0) + (question.sourceKind === 'past-paper' ? 100 : question.sourceKind === 'final-practice' ? 50 : 0);
 }
 
+function mergeImages(group) {
+  const bySrc = new Map();
+  for (const question of group) {
+    for (const image of question.images ?? []) {
+      if (image?.src && !bySrc.has(image.src)) bySrc.set(image.src, image);
+    }
+  }
+  return Array.from(bySrc.values());
+}
+
 export function dedupeQuestions(questions) {
   const groups = new Map();
   for (const question of questions) {
@@ -179,7 +189,8 @@ export function dedupeQuestions(questions) {
   const result = [];
   for (const group of groups.values()) {
     group.sort((left, right) => questionRank(right) - questionRank(left));
-    result.push(group[0]);
+    const images = mergeImages(group);
+    result.push(images.length ? { ...group[0], images } : group[0]);
   }
   return result;
 }
